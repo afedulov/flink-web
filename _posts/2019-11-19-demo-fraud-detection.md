@@ -49,8 +49,8 @@ This blogpost is accompanied by a github repository:
 
 Setup is dockerized and includes the following components:  
 
- - Apache Kafka broker with ZooKeeper  
- - Apache Flink [application cluster](https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster)  
+ - Apache Kafka (broker) with ZooKeeper
+ - Apache Flink ([application cluster](https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster))
  - Demo WebApp  
 
 #### Requirements:
