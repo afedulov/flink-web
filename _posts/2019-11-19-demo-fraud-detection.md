@@ -12,13 +12,13 @@ categories: news
 
 In this blog post you will learn about three Flink patterns for building streaming applications:
 
- - Dynamic application logic updates
+ - Dynamic updates of application logic
  - Dynamic data partitioning (shuffle), controlled at runtime
- - Low latency alerting based on windowed calculations directly via Flink state (not API)
+ - Low latency alerting based on custom window logic (not using the Window API)
 
 Those patterns might not be immediately obvious from the framework's documentation, however, they provide important building blocks to fulfil versatile business requirements.
 
-**Dynamic application logic updates** allow to modify Flink job execution at runtime, without stopping and resubmitting the code.     
+**Dynamic updates of application logic** allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.
 **Dynamic data partitioning** enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.    
 **Custom windows management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.
 
