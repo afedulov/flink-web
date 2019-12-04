@@ -195,8 +195,8 @@
 
 <p>Those patterns might not be immediately obvious from the framework’s documentation, however, they provide important building blocks to fulfil versatile business requirements.</p>
 
-<p><strong>Dynamic updates of application logic</strong> allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.
-<strong>Dynamic data partitioning</strong> enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.  <br />
+<p><strong>Dynamic updates of application logic</strong> allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.<br />
+<strong>Dynamic data partitioning</strong> enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.    <br />
 <strong>Custom windows management</strong> demonstrates how you can utilize the low level <a href="https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html">ProcessFunction API</a>, when <a href="https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html">Windows API</a> is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.</p>
 
 <p>These patterns are put together and demonstrated based on an example of a <em>Fraud Detection</em> application - a common use case for Apache Flink. This demo application consumes a stream of financial transactions and evaluates a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.</p>
@@ -221,7 +221,7 @@
 <ul>
   <li>Apache Kafka (broker) with ZooKeeper</li>
   <li>Apache Flink (<a href="https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster">application cluster</a>)</li>
-  <li>Demo WebApp</li>
+  <li>The Fraud Detection Demo WebApp</li>
 </ul>
 
 <h4 id="requirements">Requirements:</h4>
@@ -259,7 +259,9 @@ docker-compose -f docker-compose-local-job.yaml up</code></pre></div>
 
 <p>The demo comes with a set of predefined rules. You can simply click the <em>Start</em> button and after some time you should observe alerts displayed on the right side of the screen. Those alerts are the results of Flink evaluating the generated transactions stream against the predefined rules.</p>
 
-<p>The sample application consists of three main parts:</p>
+<h3 id="fraud-detection-demo">Fraud Detection Demo</h3>
+
+<p>Our sample fraud detection application consists of three main components:</p>
 
 <ol>
   <li>Fraud Detection application (Apache Flink)</li>
@@ -272,7 +274,7 @@ docker-compose -f docker-compose-local-job.yaml up</code></pre></div>
 <center>
  <img src="/img/blog/2019-11-19-demo-fraud-detection/architecture.png" width="800px" alt="Figure 2: Demo Components" />
  <br />
- <i><small>Figure 2: Demo Components</small></i>
+ <i><small>Figure 2: Fraud Detection Demo Components</small></i>
  </center>
 <p><br /></p>
 

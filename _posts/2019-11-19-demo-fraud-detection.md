@@ -18,9 +18,9 @@ In this blog post you will learn about three Flink patterns for building streami
 
 Those patterns might not be immediately obvious from the framework's documentation, however, they provide important building blocks to fulfil versatile business requirements.
 
-**Dynamic updates of application logic** allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.
-**Dynamic data partitioning** enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.    
-**Custom windows management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.
+**Dynamic updates of application logic** allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.  
+**Dynamic data partitioning** enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.      
+**Custom windows management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.  
 
 These patterns are put together and demonstrated based on an example of a _Fraud Detection_ application - a common use case for Apache Flink. This demo application consumes a stream of financial transactions and evaluates a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
 
@@ -45,7 +45,7 @@ Setup is dockerized and includes the following components:
 
  - Apache Kafka (broker) with ZooKeeper
  - Apache Flink ([application cluster](https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster))
- - Demo WebApp  
+ - The Fraud Detection Demo WebApp  
 
 #### Requirements:
 Demo is bundled in a self-contained package. In order to build it from sources you will need:
