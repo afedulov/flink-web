@@ -94,7 +94,7 @@ Our sample fraud detection application consists of three main components:
  <center>
  <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/architecture.png" width="800px" alt="Figure 2: Demo Components"/>
  <br/>
- <i><small>Figure 2: Demo Components</small></i>
+ <i><small>Figure 2: Fraud Detection Demo Components</small></i>
  </center>
  <br/>
 
