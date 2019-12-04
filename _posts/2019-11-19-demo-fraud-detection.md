@@ -135,9 +135,9 @@ Examples JSON:
 }
 ```
 
-At this point it is important to understand that **`groupingKeyNames`** determine the actual physical grouping of events - all Transactions with the same values of specified parameters (e.g. _beneficiary #25 -> payee #12_ have to be aggregated in the same parallel instance of the evaluating operator. Naturally, the process of distributing data in such manner in Flink's API is realised by a `keyBy` function.
+At this point it is important to understand that **`groupingKeyNames`** determine the actual physical grouping of events - all Transactions with the same values of specified parameters (e.g. _beneficiary #25 -> payee #12_ have to be aggregated in the same parallel instance of the evaluating operator. Naturally, the process of distributing data in such manner in Flink's API is realised by a `keyBy()` function.
 
-Although most examples in the [documentation](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-field-expressions) use specific fixed events' fields, nothing prevents us from extracting them in a more dynamic fashion, based on the specifications of the rules. For this we will need one additional preparation step before invoking the `keyBy` function.
+Although most examples in the [documentation](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-field-expressions) use specific fixed events' fields, nothing prevents us from extracting them in a more dynamic fashion, based on the specifications of the rules. For this we will need one additional preparation step before invoking the `keyBy()` function.
 
 Let's look at a high level how our main processing pipeline might look like:
 
@@ -175,7 +175,7 @@ public class DynamicKeyFunction
   }
   ...
 }
-``` 
+```
  `KeysExtractor.getKey()` uses reflection to extract required values of `groupingKeyNames` fields from events and combines them as a single concatenated String key, e.g `{beneficiaryId=25;payeeId=12}`.
 
 Notice that a wrapper class `Keyed` with the following signature was introduced as the output type of `DynamicKeyFunction`:  
@@ -195,7 +195,7 @@ public class Keyed<IN, KEY, ID> {
 
 Where `wrapped` is the original Transaction event data, `key` is the result of using `KeysExtractor` and `id` is the ID of the Rule which caused the dispatch of the event according to this Rule's grouping logic.
 
-Events of this type will be the input to the `keyBy` function of the main processing pipeline. This allows us to use a simple lambda-expression in place of a [`KeySelector`](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-key-selector-functions) as the final step of implementing dynamic data shuffle.
+Events of this type will be the input to the `keyBy()` function of the main processing pipeline. This allows us to use a simple lambda-expression in place of a [`KeySelector`](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-key-selector-functions) as the final step of implementing dynamic data shuffle.
 
 ```java
 DataStream<Alert> alerts =
