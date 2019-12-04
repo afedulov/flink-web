@@ -217,4 +217,4 @@ Effectively we are forking events for parallel evaluation in the Flink cluster. 
 
 Building a fully fledged DSL and a rules engine is not the focus of this post, hence this part is be kept to a minimum of what is required to show case intended functionality. You can, however, think about implementing more sophisticated rules, including filtering of certain events, rules chaining and other more advanced scenarios.
 
-In the next part of this blogpost we will look into how those rules sets make it into Flink and how they can be added and removed at runtime (Dynamic Application Updates pattern).
+In the next part of this series of blog posts, we will look into how these rule sets make it into Flink and how they can be added and removed at runtime (the Dynamic Application Updates pattern).
