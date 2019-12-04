@@ -72,7 +72,7 @@ docker build -t flink-job-fraud-demo:latest -f flink-job/Dockerfile flink-job/
 docker-compose -f docker-compose-local-job.yaml up
 ```
 
-__Note__: Dependencies are stored in a cached Docker layer. If you later only modify the source code, not the dependencies, you can expect significantly shorter packaging times for the subsequent builds.
+__Note__: The initial build may take some time. However, since dependencies are stored in a cached Docker layer, you can expect significantly shorter packaging times for any subsequent builds if you decide to modify the source code but keep the dependencies intact.
 
 When all components are up and running, go to `localhost:5656` in your browser.
 
