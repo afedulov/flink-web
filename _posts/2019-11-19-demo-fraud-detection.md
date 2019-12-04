@@ -103,7 +103,7 @@ Our sample fraud detection application consists of three main components:
 
 Let us start with formulating a sample rule definition for our fraud detection system as a functional requirement:  
 
-"Whenever the **sum** of accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **1 000 000 $** - fire an alert."
+"Whenever the **sum** of the accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **$ 1 000 000** - fire an alert."
 
 From this formulation we can extract the following parameters that we would like to be able to specify in a system which allows flexibility in rules definition:  
 
