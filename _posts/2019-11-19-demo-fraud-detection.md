@@ -80,7 +80,9 @@ __Note__: you might need to change exposed ports in _docker-compose-local-job.ya
 
 The demo comes with a set of predefined rules. You can simply click the _Start_ button and after some time you should observe alerts displayed on the right side of the screen. Those alerts are the results of Flink evaluating the generated transactions stream against the predefined rules.
 
- The sample application consists of three main parts:  
+### Fraud Detection Demo
+
+Our sample fraud detection application consists of three main components:
 
  1. Fraud Detection application (Apache Flink)  
  1. Frontend (React)  
