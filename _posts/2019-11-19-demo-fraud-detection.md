@@ -69,7 +69,7 @@ Demo is bundled in a self-contained package. In order to build it from sources y
 
 #### How to run:
 
- Execute the following commands to build the project from sources and start all required services, including Apache Flink and Apache Kafka clusters.
+In order to run the demo locally, execute the following commands which build the project from sources and start all required services, including the Apache Flink and Apache Kafka clusters.
 
 ```bash
 git clone https://github.com/afedulov/fraud-detection-demo
