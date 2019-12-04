@@ -153,7 +153,7 @@ public class DynamicKeyFunction
    ...
   /* Simplified */
   List<Rule> rules = /* Rules that are initialized somehow.
-                        Details will be discussed in a separate section. */;
+                        Details will be discussed in a future blog post. */;
 
   @Override
   public void processElement(
