@@ -76,7 +76,7 @@ __Note__: Dependencies are stored in a cached Docker layer. If you later only mo
 
 When all components are up and running, go to `localhost:5656` in your browser.
 
-__Note__: you might need to change exposed ports in _docker-compose-local-job.yaml_ in case of collisions.
+__Note__: In case of collisions, you might need to change the exposed ports in `docker-compose-local-job.yaml`.
 
 The demo comes with a set of predefined rules. You can simply click the _Start_ button and after some time you should observe alerts displayed on the right side of the screen. Those alerts are the results of Flink evaluating the generated transactions stream against the predefined rules.
 
