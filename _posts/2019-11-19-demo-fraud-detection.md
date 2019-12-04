@@ -189,7 +189,6 @@ public class Keyed<IN, KEY, ID> {
 }
 ```
 
-Where `wrapped` is the original Transaction event data, `key` is the result of using `KeysExtractor` and `id` is the ID of the Rule which caused the dispatch of the event according to this Rule's grouping logic.
 
 Events of this type will be the input to the `keyBy()` function of the main processing pipeline. This allows us to use a simple lambda-expression in place of a [`KeySelector`](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-key-selector-functions) as the final step of implementing dynamic data shuffle.
 
