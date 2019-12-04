@@ -174,7 +174,7 @@ public class DynamicKeyFunction
 ```
  `KeysExtractor.getKey()` uses reflection to extract required values of `groupingKeyNames` fields from events and combines them as a single concatenated String key, e.g `{beneficiaryId=25;payeeId=12}`.
 
-Notice that a wrapper class `Keyed` with the following signature was introduced as the output type of `DynamicKeyFunction`:  
+The output type of `DynamicKeyFunction` is the simple wrapper class `Keyed` where `wrapped` is the original transaction's event data, `key` is the result of using `KeysExtractor`, and `id` is the ID of the rule which caused the dispatch of the event according to this rule's grouping logic:
 
 ```java   
 public class Keyed<IN, KEY, ID> {
