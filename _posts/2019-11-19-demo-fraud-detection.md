@@ -114,7 +114,7 @@ From this formulation we can extract the following parameters that we would like
 1. Limit (1 000 000)  
 1. Limit operator (greater)  
 
-Accordingly, we will use the following simple JSON format to define the aforementioned parameters.
+We will therefore use the following simple JSON format to define the aforementioned parameters.
 
 Examples JSON:
 
