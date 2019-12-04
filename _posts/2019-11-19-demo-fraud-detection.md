@@ -22,7 +22,7 @@ Those patterns might not be immediately obvious from the framework's documentati
 **Dynamic data partitioning** enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.    
 **Custom windows management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.
 
-Those patterns are put together and demonstrated based on an example of a Fraud Detection application - a common use case for Apache Flink. This demo application consumes a stream of financial transactions and evaluates a set of rules against it. Those rules can be added and removed at runtime, without restarting the job.
+These patterns are put together and demonstrated based on an example of a _Fraud Detection_ application - a common use case for Apache Flink. This demo application consumes a stream of financial transactions and evaluates a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
 
 <center>
 <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/ui.png" width="800px" alt="Figure 1: Demo UI"/>
