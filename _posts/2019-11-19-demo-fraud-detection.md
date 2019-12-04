@@ -27,7 +27,7 @@ These patterns are put together and demonstrated based on an example of a _Fraud
 <center>
 <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/ui.png" width="800px" alt="Figure 1: Demo UI"/>
 <br/>
-<i><small>Figure 1: Demo UI</small></i>
+<i><small>Figure 1: Fraud Detection Demo UI</small></i>
 </center>
 <br/>
 
