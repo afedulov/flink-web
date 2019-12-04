@@ -35,12 +35,6 @@ These patterns are put together and demonstrated based on an example of a _Fraud
 
 This blogpost will instruct how to run the demo locally, will describe it's components and their interactions. We will look in the details into the first pattern: Dynamic Data Partitioning.
 
-If you are only interested in learning about a specific pattern, you can jump to the respective separate section (//TODO: ? depends on break up of further blogposts):  
- - Link 1  
- - Link 2  
- - Link 3  
-
-
 ### Setup
 
 This blogpost is accompanied by a github repository:
