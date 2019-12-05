@@ -10,19 +10,20 @@ excerpt:
 categories: news
 ---
 
-In this blog post you will learn about three Flink patterns for building streaming applications:
+In this series of blog posts you will learn about three powerful Flink patterns for building streaming applications:
 
  - Dynamic updates of application logic
  - Dynamic data partitioning (shuffle), controlled at runtime
  - Low latency alerting based on custom window logic (not using the Window API)
 
-Those patterns might not be immediately obvious from the framework's documentation, however, they provide important building blocks to fulfil versatile business requirements.
+These patterns expand the possibilities of what is possible with statically defined data flows and therefore provide important building blocks to fulfil versatile business requirements.
 
-**Dynamic updates of application logic** allow Flink jobs to be versatile and change at runtime, without downtime from stopping and resubmitting the code.  
-**Dynamic data partitioning** enables the ability to configure how events are being shuffled and grouped within the cluster at runtime.      
-**Custom windows management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.  
+**Dynamic updates of application logic** allow Flink jobs to change at runtime, without downtime from stopping and resubmitting the code.  
+**Dynamic data partitioning** enables the ability to change how events are being distributed and grouped by the `keyBy()` operator in Flink at runtime. Such functionality often becomes a natural requirement when building jobs with dynamically reconfigurable application logic.
+**Custom window management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.  
 
-These patterns are put together and demonstrated based on an example of a _Fraud Detection_ application - a common use case for Apache Flink. This demo application consumes a stream of financial transactions and evaluates a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
+These patterns are build up on top of core Flink functionality, but might not be immediately obvious from the framework's documentation as it is not easy to explain them without a concrete example use case. For this reason we will look at the details of the patterns on an example of building an application which represents a common a use case for Apache Flink - a _Fraud Detection_ engine.
+We hope this series to put these powerful ideas into your tool belt and enable building new exciting Flink applications.
 
 <center>
 <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/ui.png" width="800px" alt="Figure 1: Demo UI"/>
@@ -32,6 +33,7 @@ These patterns are put together and demonstrated based on an example of a _Fraud
 <br/>
 
 
+The goal of the demo Fraud Detection engine is to consume a stream of financial transactions and evaluate a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
 
 This blogpost will instruct how to run the demo locally, will describe it's components and their interactions. We will look in the details into the first pattern: Dynamic Data Partitioning.
 
@@ -45,7 +47,7 @@ Setup is dockerized and includes the following components:
 
  - Apache Kafka (broker) with ZooKeeper
  - Apache Flink ([application cluster](https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster))
- - The Fraud Detection Demo WebApp  
+ - The Fraud Detection bApp  
 
 #### Requirements:
 Demo is bundled in a self-contained package. In order to build it from sources you will need:
@@ -72,11 +74,11 @@ docker build -t flink-job-fraud-demo:latest -f flink-job/Dockerfile flink-job/
 docker-compose -f docker-compose-local-job.yaml up
 ```
 
-__Note__: The initial build may take some time. However, since dependencies are stored in a cached Docker layer, you can expect significantly shorter packaging times for any subsequent builds if you decide to modify the source code but keep the dependencies intact.
+__Note__: Dependencies are stored in a cached Docker layer. If you later only modify the source code, not the dependencies, you can expect significantly shorter packaging times for the subsequent builds.
 
 When all components are up and running, go to `localhost:5656` in your browser.
 
-__Note__: In case of collisions, you might need to change the exposed ports in `docker-compose-local-job.yaml`.
+__Note__: you might need to change exposed ports in _docker-compose-local-job.yaml_ in case of collisions.
 
 The demo comes with a set of predefined rules. You can simply click the _Start_ button and after some time you should observe alerts displayed on the right side of the screen. Those alerts are the results of Flink evaluating the generated transactions stream against the predefined rules.
 
@@ -103,7 +105,7 @@ Our sample fraud detection application consists of three main components:
 
 Let us start with formulating a sample rule definition for our fraud detection system as a functional requirement:  
 
-"Whenever the **sum** of the accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **$ 1 000 000** - fire an alert."
+"Whenever the **sum** of accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **1 000 000 $** - fire an alert."
 
 From this formulation we can extract the following parameters that we would like to be able to specify in a system which allows flexibility in rules definition:  
 
@@ -114,7 +116,7 @@ From this formulation we can extract the following parameters that we would like
 1. Limit (1 000 000)  
 1. Limit operator (greater)  
 
-We will therefore use the following simple JSON format to define the aforementioned parameters.
+Accordingly, we will use the following simple JSON format to define the aforementioned parameters.
 
 Examples JSON:
 
@@ -153,7 +155,7 @@ public class DynamicKeyFunction
    ...
   /* Simplified */
   List<Rule> rules = /* Rules that are initialized somehow.
-                        Details will be discussed in a future blog post. */;
+                        Details will be discussed in a separate section. */;
 
   @Override
   public void processElement(
@@ -174,7 +176,7 @@ public class DynamicKeyFunction
 ```
  `KeysExtractor.getKey()` uses reflection to extract required values of `groupingKeyNames` fields from events and combines them as a single concatenated String key, e.g `{beneficiaryId=25;payeeId=12}`.
 
-The output type of `DynamicKeyFunction` is the simple wrapper class `Keyed` where `wrapped` is the original transaction's event data, `key` is the result of using `KeysExtractor`, and `id` is the ID of the rule which caused the dispatch of the event according to this rule's grouping logic:
+Notice that a wrapper class `Keyed` with the following signature was introduced as the output type of `DynamicKeyFunction`:  
 
 ```java   
 public class Keyed<IN, KEY, ID> {
@@ -189,6 +191,7 @@ public class Keyed<IN, KEY, ID> {
 }
 ```
 
+Where `wrapped` is the original Transaction event data, `key` is the result of using `KeysExtractor` and `id` is the ID of the Rule which caused the dispatch of the event according to this Rule's grouping logic.
 
 Events of this type will be the input to the `keyBy()` function of the main processing pipeline. This allows us to use a simple lambda-expression in place of a [`KeySelector`](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-key-selector-functions) as the final step of implementing dynamic data shuffle.
 
