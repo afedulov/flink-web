@@ -19,70 +19,38 @@ In this series of blog posts you will learn about three powerful Flink patterns 
 These patterns expand the possibilities of what is possible with statically defined data flows and therefore provide important building blocks to fulfil versatile business requirements.
 
 **Dynamic updates of application logic** allow Flink jobs to change at runtime, without downtime from stopping and resubmitting the code.  
-**Dynamic data partitioning** enables the ability to change how events are being distributed and grouped by the `keyBy()` operator in Flink at runtime. Such functionality often becomes a natural requirement when building jobs with dynamically reconfigurable application logic.
-**Custom window management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Windows API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.  
+<br>
+**Dynamic data partitioning** enables the ability to change how events are being distributed and grouped by the `keyBy()` operator in Flink at runtime. Such functionality often becomes a natural requirement when building jobs with dynamically reconfigurable application logic.  
+<br>
+**Custom window management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Window API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.    
 
-These patterns are build up on top of core Flink functionality, but might not be immediately obvious from the framework's documentation as it is not easy to explain them without a concrete example use case. For this reason we will look at the details of the patterns on an example of building an application which represents a common a use case for Apache Flink - a _Fraud Detection_ engine.
-We hope this series to put these powerful ideas into your tool belt and enable building new exciting Flink applications.
+The patterns are built up on top of core Flink functionality, however they might not be immediately obvious from the framework's documentation as it is not trivial to explain and give motivation behind them without a concrete example use case. For this reason we will look at the details of the patterns on an example of building an application which represents a common a use case for Apache Flink - a _Fraud Detection_ engine.
+We hope this series will put these powerful ideas into your tool belt and enable you to tackle new interesting use cases with Apache Flink.
 
-<center>
-<img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/ui.png" width="800px" alt="Figure 1: Demo UI"/>
-<br/>
-<i><small>Figure 1: Fraud Detection Demo UI</small></i>
-</center>
-<br/>
+In the first blog post of the series we will look at the high level architecture of the demo application, describe its components and their interactions. We will proceed with a deep dive into the implementation details of the first pattern in the series - **dynamic data partitioning**.
+
+You will be able to run the full Fraud Detection Demo application locally and look into the details of the implementation by using accompanying GitHub repository.
 
 
-The goal of the demo Fraud Detection engine is to consume a stream of financial transactions and evaluate a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
+### Fraud Detection Demo
 
-This blogpost will instruct how to run the demo locally, will describe it's components and their interactions. We will look in the details into the first pattern: Dynamic Data Partitioning.
+##### Setup
 
-### Setup
-
+If you want to see the complete code ....
 This blogpost is accompanied by a github repository:
 
-[](https://github.com/afedulov/fraud-detection-demo)
+[https://github.com/afedulov/fraud-detection-demo](https://github.com/afedulov/fraud-detection-demo)
 
-Setup is dockerized and includes the following components:  
+You can checkout the repository and run the demo locally. Setup is dockerized and includes the following components:  
 
  - Apache Kafka (broker) with ZooKeeper
  - Apache Flink ([application cluster](https://ci.apache.org/projects/flink/flink-docs-stable/concepts/glossary.html#flink-application-cluster))
- - The Fraud Detection bApp  
-
-#### Requirements:
-Demo is bundled in a self-contained package. In order to build it from sources you will need:
-
- - git
- - docker
- - docker-compose
-
- Recommended resources allocated to Docker:
-
- - 4 CPUs
- - 8GB RAM
-
- You can checkout the repository and run the demo locally.
-
-#### How to run:
-
-In order to run the demo locally, execute the following commands which build the project from sources and start all required services, including the Apache Flink and Apache Kafka clusters.
-
-```bash
-git clone https://github.com/afedulov/fraud-detection-demo
-docker build -t demo-fraud-webapp:latest -f webapp/webapp.Dockerfile webapp/
-docker build -t flink-job-fraud-demo:latest -f flink-job/Dockerfile flink-job/
-docker-compose -f docker-compose-local-job.yaml up
-```
-
-__Note__: Dependencies are stored in a cached Docker layer. If you later only modify the source code, not the dependencies, you can expect significantly shorter packaging times for the subsequent builds.
-
-When all components are up and running, go to `localhost:5656` in your browser.
-
-__Note__: you might need to change exposed ports in _docker-compose-local-job.yaml_ in case of collisions.
+ - The Fraud Detection App  
 
 The demo comes with a set of predefined rules. You can simply click the _Start_ button and after some time you should observe alerts displayed on the right side of the screen. Those alerts are the results of Flink evaluating the generated transactions stream against the predefined rules.
 
-### Fraud Detection Demo
+
+The high level goal of our demo Fraud Detection engine is to consume a stream of financial transactions and evaluate a set of rules against it. Such rules can be added and removed at runtime, without restarting the job.
 
 Our sample fraud detection application consists of three main components:
 
@@ -90,6 +58,12 @@ Our sample fraud detection application consists of three main components:
  1. Frontend (React)  
  1. Backend (SpringBoot)  
 
+ <center>
+ <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/ui.png" width="800px" alt="Figure 1: Demo UI"/>
+ <br/>
+ <i><small>Figure 1: Fraud Detection Demo UI</small></i>
+ </center>
+ <br/>
 
  Backend includes a Transactions Generator, which sends emulated transactions to Flink via Kafka. Whenever a new rule definition is created in the UI, the backend also pushes it to Flink via a separate topic. Alerts generated by Flink are consumed by the Backend and relayed to the UI via WebSockets.
 
