@@ -136,9 +136,16 @@ DataStream<Alert> alerts =
         .process(/* actual calculations and alerting */)
 ```
 
-We have previously established that each rule defines a **`groupingKeyNames`** parameter, which will determine where events will be routed in the parallel context of the cluster.
+We have previously established that each rule defines a **`groupingKeyNames`** parameter. This parameter specifies which combination of fields will be used for the incoming events' grouping. Each rule might use an arbitrary combination of these fields. At the same time, every incoming event potentially needs to be evaluated against every rule. This implies that with a basic approach events might simultaneously need to be present at multiple parallel instances of the rules evaluating operator and hence will need to be forked. Ensuring such events dispatching is the purpose of the `DynamicKeyFunction()`.
 
-Given a set of predefined rules in the first step of the processing pipeline, we would like to iterate over them and prepare every event to be dispatched to a respective aggregating instance. This is what is done in `DynamicKeyFunction`:
+<center>
+<img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/shuffle_function.png" width="800px" alt="Figure 3: Dynamic Key Function"/>
+<br/>
+<i><small>Figure 3: Dynamic Key Function</small></i>
+</center>
+<br/>
+
+Given a set of predefined rules in the first step of the processing pipeline, we would like to iterate over them and prepare every event to be dispatched to a respective aggregating instance. This is what is done in the `DynamicKeyFunction`:
 
 ```java
 public class DynamicKeyFunction

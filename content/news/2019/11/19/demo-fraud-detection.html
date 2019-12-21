@@ -313,9 +313,16 @@ To understand why this is the case, let us start with articulating a realistic s
         <span class="o">.</span><span class="na">keyBy</span><span class="o">(</span><span class="cm">/* some key selector */</span><span class="o">);</span>
         <span class="o">.</span><span class="na">process</span><span class="o">(</span><span class="cm">/* actual calculations and alerting */</span><span class="o">)</span></code></pre></div>
 
-<p>We have previously established that each rule defines a <strong><code>groupingKeyNames</code></strong> parameter, which will determine where events will be routed in the parallel context of the cluster.</p>
+<p>We have previously established that each rule defines a <strong><code>groupingKeyNames</code></strong> parameter. This parameter specifies which combination of fields will be used for the incoming events’ grouping. Each rule might use an arbitrary combination of these fields. At the same time, every incoming event potentially needs to be evaluated against every rule. This implies that with a basic approach events might simultaneously need to be present at multiple parallel instances of the rules evaluating operator and hence will need to be forked. Ensuring such events dispatching is the purpose of the <code>DynamicKeyFunction()</code>.</p>
 
-<p>Given a set of predefined rules in the first step of the processing pipeline, we would like to iterate over them and prepare every event to be dispatched to a respective aggregating instance. This is what is done in <code>DynamicKeyFunction</code>:</p>
+<center>
+<img src="/img/blog/2019-11-19-demo-fraud-detection/shuffle_function.png" width="800px" alt="Figure 3: Dynamic Key Function" />
+<br />
+<i><small>Figure 3: Dynamic Key Function</small></i>
+</center>
+<p><br /></p>
+
+<p>Given a set of predefined rules in the first step of the processing pipeline, we would like to iterate over them and prepare every event to be dispatched to a respective aggregating instance. This is what is done in the <code>DynamicKeyFunction</code>:</p>
 
 <div class="highlight"><pre><code class="language-java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DynamicKeyFunction</span>
     <span class="kd">extends</span> <span class="n">ProcessFunction</span><span class="o">&lt;</span><span class="n">Transaction</span><span class="o">,</span> <span class="n">Keyed</span><span class="o">&lt;</span><span class="n">Transaction</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">Integer</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
