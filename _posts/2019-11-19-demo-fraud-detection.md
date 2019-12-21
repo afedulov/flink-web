@@ -24,8 +24,8 @@ These patterns expand the possibilities of what is possible with statically defi
 <br>
 **Custom window management** demonstrates how you can utilize the low level [ProcessFunction API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/process_function.html), when [Window API](https://ci.apache.org/projects/flink/flink-docs-stable/dev/stream/operators/windows.html) is not exactly matching your requirements. Specifically, you will learn how to implement low latency alerting on windows and how to limit state growth with timers.    
 
-The patterns are built up on top of core Flink functionality, however they might not be immediately obvious from the framework's documentation as it is not trivial to explain and give motivation behind them without a concrete example use case. For this reason we will look at the details of the patterns on an example of building an application which represents a common use case for Apache Flink - a _Fraud Detection_ engine.
-We hope this series will put these powerful approaches into your tool belt and enable you to tackle new interesting use cases with Apache Flink.
+The patterns are built up on top of core Flink functionality, however they might not be immediately obvious from the framework's documentation as it is not trivial to explain and give motivation behind them without a concrete example use case. For this reason we will look at the details of the patterns on an example of building an application which represents a common usage scenario for Apache Flink - a _Fraud Detection_ engine.
+We hope this series will put these powerful approaches into your tool belt and enable you to tackle new tasks with Apache Flink.
 
 In the first blog post of the series we will look at the high level architecture of the demo application, describe its components and their interactions. We will proceed with a deep dive into the implementation details of the first pattern in the series - **dynamic data partitioning**.
 
@@ -56,15 +56,16 @@ When you navigate to the demo URL in your browser, you will be presented with th
 
 On the left side you can see a visual representation of financial transactions flowing through the system after you click the "Start" button. The slider at the top allows you to control the number of transactions per second generated for the demo purposes. The middle section is devoted to managing the rules evaluated by Flink. In this section you can create new rules as well as issue certain control commands, such as clearing Flink's state.
 
-The demo out already of the box comes with a set of predefined sample rules. You can simply click the _Start_ button and after some time observe alerts displayed in the right section of the UI. These alerts are the result of Flink evaluating the generated transactions stream against the predefined rules.
+The demo out of the box comes with a set of predefined sample rules. You can
+click the _Start_ button and after some time will observe alerts displayed in the right section of the UI. These alerts are the result of Flink evaluating the generated transactions stream against the predefined rules.
 
- Our sample fraud detection application consists of three main components:
+ Our sample fraud detection system consists of three main components:
 
   1. Frontend (React)  
   1. Backend (SpringBoot)  
   1. Fraud Detection application (Apache Flink)  
 
-Interactions between the main elements is depicted on _Figure 2_.
+Interactions between the main elements are depicted on _Figure 2_.
 
  <center>
  <img src="{{ site.baseurl }}/img/blog/2019-11-19-demo-fraud-detection/architecture.png" width="800px" alt="Figure 2: Demo Components"/>
@@ -81,7 +82,7 @@ Now that you are familiar with the overall layout and the goal of our Fraud Dete
 
 The first pattern we will look into is Dynamic Data Partitioning.
 
-Flink's DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the **keyBy()** operator. It partitions the stream in a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent "keyed" operator.
+Flink's DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the **keyBy()** operator. It partitions the stream in such a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent "keyed" operator.
 
 In a typical statically-defined streaming application the choice of the key is fixed and it is usually immediately derived from one of the fields of the incoming records. For instance, in case of a simple window-based computation over a stream of Tuples, we could use the first field (denoted by 0) as the key:
 
@@ -95,9 +96,9 @@ DataStream<...> windowed = input
 This approach is the basic building block for achieving horizontal scalability for a wide range of use cases. However, in the case of an application that strives to provide flexibility in business logic at runtime, this is not enough.
 To understand why this is the case, let us start with articulating a realistic sample rule definition for our fraud detection system in a form of a functional requirement:  
 
-"Whenever the **sum** of accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **1 000 000 $** - fire an alert."
+*"Whenever the **sum** of accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **1 000 000 $** - fire an alert."*
 
-In this formulation we can see a number of parameters that we would like to be able to specify when submitting a new rule to the fraud detection engine during its runtime:
+In this formulation we can see a number of parameters that we would have to be able to specify in a newly submitted rule and later modify or tweak at runtime:
 
 1. Aggregation field (payment amount)  
 1. Grouping fields (beneficiary + payee)  
@@ -121,11 +122,11 @@ Accordingly, we will use the following simple JSON format to define the aforemen
 }
 ```
 
-At this point it is important to understand that **`groupingKeyNames`** determine the actual physical grouping of events - all Transactions with the same values of specified parameters (e.g. _beneficiary #25 -> payee #12_ have to be aggregated in the same parallel instance of the evaluating operator. Naturally, the process of distributing data in such manner in Flink's API is realised by a `keyBy()` function.
+At this point it is important to understand that **`groupingKeyNames`** determine the actual physical grouping of events - all Transactions with the same values of specified parameters (e.g. _beneficiary #25 -> payee #12_ have to be aggregated in the same parallel instance of the evaluating operator. Naturally, the process of distributing data in such a manner in Flink's API is realised by a `keyBy()` function with a hard-coded `KeySelector`.
 
-Although most examples in the [documentation](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-field-expressions) use specific fixed events' fields, nothing prevents us from extracting them in a more dynamic fashion, based on the specifications of the rules. For this we will need one additional preparation step before invoking the `keyBy()` function.
+Most examples in the [documentation](https://ci.apache.org/projects/flink/flink-docs-stable/dev/api_concepts.html#define-keys-using-field-expressions) use specific fixed events' fields. However, we can also extract them in a more dynamic fashion based on the specifications of the rules. For this, we need one additional operator that prepares every event to be dispatched to a respective aggregating instance.
 
-Let's look at a high level how our main processing pipeline might look like:
+On a high level, our main processing pipeline might look like this:
 
 ```java
 DataStream<Alert> alerts =
@@ -134,6 +135,8 @@ DataStream<Alert> alerts =
         .keyBy(/* some key selector */);
         .process(/* actual calculations and alerting */)
 ```
+
+We have previously established that each rule defines a **`groupingKeyNames`** parameter, which will determine where events will be routed in the parallel context of the cluster.
 
 Given a set of predefined rules in the first step of the processing pipeline, we would like to iterate over them and prepare every event to be dispatched to a respective aggregating instance. This is what is done in `DynamicKeyFunction`:
 
