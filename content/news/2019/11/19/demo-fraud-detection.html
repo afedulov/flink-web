@@ -262,21 +262,21 @@ We hope this series will put these powerful approaches into your tool belt and e
 
 <p>The first pattern we will look into is Dynamic Data Partitioning.</p>
 
-<p>Flink’s DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the <code>keyBy()</code> operator. It partitions the stream in a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent “keyed” operator. In a typical statically-defined streaming application the choice of the key is fixed and it is usually immediately derived from one of the fields of the incoming records. For instance, in case of a simple window-based computation over a stream of Tuples, we could use the first field (denoted by 0) as the key:</p>
+<p>Flink’s DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the <strong>keyBy()</strong> operator. It partitions the stream in a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent “keyed” operator.</p>
+
+<p>In a typical statically-defined streaming application the choice of the key is fixed and it is usually immediately derived from one of the fields of the incoming records. For instance, in case of a simple window-based computation over a stream of Tuples, we could use the first field (denoted by 0) as the key:</p>
 
 <div class="highlight"><pre><code class="language-java"><span class="n">DataStream</span><span class="o">&lt;</span><span class="n">Tuple2</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Integer</span><span class="o">&gt;&gt;</span> <span class="n">input</span> <span class="o">=</span> <span class="c1">// [...]</span>
 <span class="n">DataStream</span><span class="o">&lt;...&gt;</span> <span class="n">windowed</span> <span class="o">=</span> <span class="n">input</span>
   <span class="o">.</span><span class="na">keyBy</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
   <span class="o">.</span><span class="na">window</span><span class="o">(</span><span class="cm">/*window specification*/</span><span class="o">);</span></code></pre></div>
 
-<p>This is the basic building block for achieving horizontal scalability which covers a wide range of use cases. However, in a case of an application that strives to provide flexibility in business logic at runtime, this is not enough.
+<p>This approach is the basic building block for achieving horizontal scalability for a wide range of use cases. However, in the case of an application that strives to provide flexibility in business logic at runtime, this is not enough.
 To understand why this is the case, let us start with articulating a realistic sample rule definition for our fraud detection system in a form of a functional requirement:</p>
 
 <p>“Whenever the <strong>sum</strong> of accumulated <strong>payment amount</strong> from the same <strong>beneficiary</strong> to the same <strong>payee</strong> within the <strong>duration of a week</strong> is <strong>greater</strong> than <strong>1 000 000 $</strong> - fire an alert.”</p>
 
-<p>This rule shows a number of parameters that we would like to be flexible and expose for any (new) rule that is being sent to our fraud detection application during its runtime:</p>
-
-<p>From this formulation we can extract the following parameters that we would like to be able to specify in a system which allows flexibility in rules definition:</p>
+<p>In this formulation we can see a number of parameters that we would like to be able to specify when submitting a new rule to the fraud detection engine during its runtime:</p>
 
 <ol>
   <li>Aggregation field (payment amount)</li>
@@ -287,9 +287,7 @@ To understand why this is the case, let us start with articulating a realistic s
   <li>Limit operator (greater)</li>
 </ol>
 
-<p>Accordingly, we will use the following simple JSON format to define the aforementioned parameters.</p>
-
-<p>Examples JSON:</p>
+<p>Accordingly, we will use the following simple JSON format to define the aforementioned parameters. Examples JSON:</p>
 
 <div class="highlight"><pre><code class="language-json"><span class="p">{</span>
   <span class="nt">&quot;ruleId&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>

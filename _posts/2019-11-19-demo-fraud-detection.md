@@ -81,7 +81,9 @@ Now that you are familiar with the overall layout and the goal of our Fraud Dete
 
 The first pattern we will look into is Dynamic Data Partitioning.
 
-Flink's DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the `keyBy()` operator. It partitions the stream in a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent "keyed" operator. In a typical statically-defined streaming application the choice of the key is fixed and it is usually immediately derived from one of the fields of the incoming records. For instance, in case of a simple window-based computation over a stream of Tuples, we could use the first field (denoted by 0) as the key:
+Flink's DataStream API includes an important operator that determines the distribution of incoming data (shuffle) among the parallel computational nodes of the cluster - the **keyBy()** operator. It partitions the stream in a way that all records with the same key are assigned to the same partition and are hence sent to the same instance of the subsequent "keyed" operator.
+
+In a typical statically-defined streaming application the choice of the key is fixed and it is usually immediately derived from one of the fields of the incoming records. For instance, in case of a simple window-based computation over a stream of Tuples, we could use the first field (denoted by 0) as the key:
 
 ```java
 DataStream<Tuple2<String, Integer>> input = // [...]
@@ -90,14 +92,12 @@ DataStream<...> windowed = input
   .window(/*window specification*/);
 ```
 
-This is the basic building block for achieving horizontal scalability which covers a wide range of use cases. However, in a case of an application that strives to provide flexibility in business logic at runtime, this is not enough.
+This approach is the basic building block for achieving horizontal scalability for a wide range of use cases. However, in the case of an application that strives to provide flexibility in business logic at runtime, this is not enough.
 To understand why this is the case, let us start with articulating a realistic sample rule definition for our fraud detection system in a form of a functional requirement:  
 
 "Whenever the **sum** of accumulated **payment amount** from the same **beneficiary** to the same **payee** within the **duration of a week** is **greater** than **1 000 000 $** - fire an alert."
 
-This rule shows a number of parameters that we would like to be flexible and expose for any (new) rule that is being sent to our fraud detection application during its runtime:
-
-From this formulation we can extract the following parameters that we would like to be able to specify in a system which allows flexibility in rules definition:  
+In this formulation we can see a number of parameters that we would like to be able to specify when submitting a new rule to the fraud detection engine during its runtime:
 
 1. Aggregation field (payment amount)  
 1. Grouping fields (beneficiary + payee)  
@@ -106,9 +106,7 @@ From this formulation we can extract the following parameters that we would like
 1. Limit (1 000 000)  
 1. Limit operator (greater)  
 
-Accordingly, we will use the following simple JSON format to define the aforementioned parameters.
-
-Examples JSON:
+Accordingly, we will use the following simple JSON format to define the aforementioned parameters. Examples JSON:
 
 ```json  
 {
